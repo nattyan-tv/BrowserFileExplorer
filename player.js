@@ -1,5 +1,14 @@
+var music = new Audio();
+music.addEventListener("ended", function () {
+    music.pause();
+    music.currentTime = 0;
+}, false);
+
+var stopMotion = false;
+
 function getList(){
     var url = document.getElementById("url").value;
+    document.getElementById("btAction").disabled = true;
     $.ajax({
         type: 'POST',
         url: 'player.py',
@@ -11,7 +20,6 @@ function getList(){
         },
     })
     .done(function(data) {
-        console.log(data);
         if (data["status"] == "success")
         {
             var selection = document.getElementById("selection");
@@ -36,9 +44,13 @@ function getList(){
         }
     })
     .fail(function(XMLHttpRequest, status, e) {
-        alert("エラーが発生しました。\n" + e)
+        alert("アクセス時にエラーが発生しました。")
         console.log(XMLHttpRequest.responseText, status, e);
     })
+    .always(function(){
+        document.getElementById("btAction").disabled = false;
+    });
+    return false;
 }
 
 function checkFile(){
@@ -53,13 +65,14 @@ function checkFile(){
     }
     else
     {
-        document.getElementById("btAction").value = "Expand"
+        document.getElementById("btAction").value = "Select"
         document.getElementById("btAction").onclick = expand;
     }
 }
 
 function expand(){
     url = document.getElementById("url").value;
+    baseUrl = url;
     selection = document.getElementById("selection").value;
     if (selection == ".."){
         if (url.slice(-1) == "/")
@@ -84,5 +97,58 @@ function expand(){
 }
 
 function playSound(){
-    return
+    url = document.getElementById("url").value;
+    if (url.slice(0, 1) != "/")
+    {
+        url = "/" + url
+    }
+    if (url.slice(-1) != "/")
+    {
+        url = url + "/";
+    }
+    selection = document.getElementById("selection").value;
+    url = DAVURL + url + selection.slice(2);
+    music.pause();
+    music.src = url;
+    music.load();
+    music.currentTime = 0;
+    music.addEventListener('loadedmetadata', function() {
+        document.getElementById("range").max = music.duration;
+        music.play();
+    });
+    document.getElementById("range").value = 0;
+}
+
+
+function resume(){
+    music.play();
+}
+
+function pause(){
+    music.pause();
+}
+
+
+window.onload = function(){
+    setInterval("showTime()", 1);
+}
+
+function showTime(){
+    var time = music.currentTime;
+    if (!stopMotion){
+        document.getElementById("range").value = time;
+    }
+}
+
+function changeTime(){
+    music.currentTime = document.getElementById("range").value
+}
+
+function onDown(){
+    stopMotion = true;
+}
+
+function onUp(){
+    music.currentTime = document.getElementById("range").value;
+    stopMotion = false;
 }

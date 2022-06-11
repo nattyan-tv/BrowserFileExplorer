@@ -21,19 +21,23 @@ def main():
     url = form['dir'].value
     if url is None:
         print(json.dumps(
-            {"status": "error", "description": "No url provided"}
+            {"status": "error", "description": "No url provided", "dir": url}
         ))
         return
     if not os.path.isdir(url):
         print(json.dumps(
-            {"status": "error", "description": "Not a directory"}
+            {"status": "error", "description": "Not a directory", "dir": url}
         ))
         return
     else:
-        dirs = [f"D:{i}" for i in os.listdir(
+        dirs = [i for i in os.listdir(
             url) if os.path.isdir(os.path.join(url, i))]
-        files = [f"F:{i}" for i in os.listdir(
+        files = [i for i in os.listdir(
             url) if os.path.isfile(os.path.join(url, i))]
+        dirs.sort()
+        files.sort()
+        dirs = [f"D:{i}" for i in dirs]
+        files = [f"F:{i}" for i in files]
         fs = dirs + files
         print(json.dumps(
             {"status": "success", "description": "Geted.", "files": fs, "dir": url}
