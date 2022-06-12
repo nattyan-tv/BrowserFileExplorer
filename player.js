@@ -2,6 +2,7 @@ var music = new Audio();
 music.addEventListener("ended", function () {
     music.pause();
     music.currentTime = 0;
+    document.title = "Player"
 }, false);
 
 var stopMotion = false;
@@ -109,6 +110,7 @@ function playSound(){
     selection = document.getElementById("selection").value;
     url = DAVURL + url + selection.slice(2);
     music.pause();
+    document.title = selection.slice(2) + " - Player"
     music.src = url;
     music.load();
     music.currentTime = 0;
